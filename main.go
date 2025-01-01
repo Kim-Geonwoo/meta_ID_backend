@@ -8,8 +8,6 @@ import (
 	"meta_ID_backend/database"
 	"meta_ID_backend/resolvers"
 
-	"github.com/rs/cors"
-
 	"github.com/graphql-go/handler"
 )
 
@@ -21,27 +19,17 @@ func main() {
 		port = defaultPort
 	}
 
-	// 데이터베이스 초기화
 	database.InitDB()
 
-	// GraphQL 스키마 설정
 	schema := resolvers.NewRoot()
 
-	// GraphQL 핸들러 설정
 	h := handler.New(&handler.Config{
 		Schema:   schema,
 		GraphiQL: true,
 	})
 
-	// CORS 설정 추가
-	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"metaid-backend.geonwoo.dev"}, // 허용할 클라이언트의 도메인
-		AllowCredentials: true,
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
-	}).Handler(h)
-
-	http.Handle("/graphql", corsHandler)
+	// CORS 설정을 끄기 위해 직접 핸들러를 설정
+	http.Handle("/graphql", h)
 
 	log.Printf("connect to http://localhost:%s/graphql for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
